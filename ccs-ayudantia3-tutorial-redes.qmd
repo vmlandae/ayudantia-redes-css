@@ -1,0 +1,707 @@
+---
+title: "Introducción a Redes Complejas"
+subtitle: "Ayudantía 3- Curso métodos en Ciencias Sociales Computacionales"
+#author:
+#  name: Víctor Landaeta - Melanie Oyarzún
+#  affiliation: Universidad del Desarrollo
+#  email: v.landaeta@udd.cl moyarzunw@udd.cl
+#date: "`r format(Sys.time(), '%d %B %Y')`"
+format: 
+    html:
+        
+        theme: cosmo
+        toc: true
+        toc-depth: 3
+        embed-resources: true
+        self-contained-math: true
+keep-md: true
+editor options:
+  markdown:
+    wrap: 72
+execute:
+  eval: true
+  warning: false
+number-sections: false
+crossref:
+  chapters: true
+---
+# Tutorial: Introducción a la ciencia de redes con R e igraph
+
+En este tutorial, cubriremos los conceptos básicos de Network Science con `R` y el paquete `igraph`. Exploraremos los fundamentos de las redes, incluida la estructura y la dinámica de la red. 
+
+# Introducción a Redes Complejas y Teoría de Grafos
+
+Las redes complejas son sistemas compuestos por muchos elementos interconectados. Se encuentran en muchos sistemas naturales y artificiales, como Internet, redes sociales, redes celulares y redes de transporte. La teoría de grafos es la herramienta matemática utilizada para estudiar y analizar redes complejas. Los grafos están compuestos por nodos y aristas, que representan los elementos y conexiones de la red. La teoría de grafos permite el análisis de la estructura, la dinámica y la evolución de la red.
+
+# Elementos de una Red: Nodos y Aristas
+
+En la teoría de grafos, una red se representa como un grafo, que se compone de nodos (también conocidos como vértices) y enlaces (también llamados bordes o aristas).  
+Los nodos representan los elementos de la red, como personas en una red social o ciudades en una red de transporte. Los bordes representan las conexiones entre nodos, como las relaciones entre personas o carreteras que conectan ciudades.
+
+# Cargando igraph y creando una primera red
+```{r}
+# Cargando igraph
+library(igraph)
+# Creando una primera red simple mediante fórmula
+net <- graph.formula(A--B, B--C, C--D, D--E, E--F, F--G, G--A)
+# Imprimiendo el output de la red en igraph:
+net
+
+```
+Es posible también crear una red vacía y luego ir llenándola con nodos y enlaces
+
+```{r}
+# Crear un grafo de red vacío
+g <- graph.empty() 
+
+# Agregar vértices al grafo
+g <- add.vertices(g, 5) 
+
+# Agregar links al grafo
+g <- add.edges(g, c(1,2, 1,3, 1,4, 1,5)) 
+
+```
+
+El paquete `igraph` tiene un módulo para graficar que está escrito sobre el paquete `plot` del base `R`. Por lo tanto, podemos obtener rápidamente una visualización de estas redes.
+
+```{r}
+plot(net)
+
+```
+
+```{r}
+plot(g)
+```
+
+
+# Propiedades de Redes y sus elementos
+## Número de nodos y de enlaces:
+* **Número de nodos**, o $N$, representa el número de componentes en el sistema. A menudo llamaremos a N el tamaño de la red. Para distinguir los nodos, los etiquetamos con `i = 1, 2, ..., N`.
+
+* **Número de enlaces**, que denotamos con $L$, representa el número total de interacciones entre los nodos. Los enlaces rara vez están etiquetados, ya que pueden identificarse a través de los nodos que conectan. Por ejemplo, el enlace `(2, 4)` conecta los nodos `2` y `4`.
+
+## Redes dirigidas y no dirigidas
+Una de las más básicas es la diferenciación entre redes dirigidas o redes no dirigidas. En las redes no dirigidas, los enlaces no tienen dirección, lo que significa que la conexión entre dos nodos es simétrica, por ejemplo en una red de amistad en Facebook. En las redes dirigidas, los enlaces tienen una dirección, lo que significa que la conexión entre dos nodos es asimétrica, por ejemplo en redes de seguidores en Twitter.
+    
+    
+**¿Qué podemos decir de N y L en las redes anteriores? ¿y de la direccionalidad de ambas redes?** 
+
+```{r}
+# en igraph podemos llamar separadamente a los nodos y los enlaces de un grafo.
+# para los nodos, podemos hacer
+V(net)
+
+```
+```{r}
+# por tanto, una forma de calcular el número de nodos N es haciendo
+length(V(net))
+#o también con la función construida 
+vcount(g)
+```
+```{r}
+# análogamente para los enlaces
+length(E(net))
+ecount(g)
+
+```
+```{r}
+# para ver si un grafo es dirigido o no
+
+is_directed(net)
+is.directed(g)
+```
+  
+
+# Atributos
+
+Las redes también pueden tener atributos asociados a los nodos y a los enlaces. Los atributos de nodo son características asociadas con cada nodo, como la edad de una persona en una red social o la población de una ciudad en una red de transporte. Los atributos de enlace son características asociadas con cada enlace, como la fuerza de una relación entre dos personas en una red social o la distancia entre dos ciudades en una red de transporte.
+
+
+
+
+## Grado de un nodo
+
+Una propiedad clave de cada nodo es su grado, que representa el número de enlaces que tiene con otros nodos. El grado puede representar la cantidad de contactos de teléfonos celulares que tiene una persona en un grafo de llamadas (es decir, la cantidad de personas diferentes con las que ha hablado la persona), la cantidad de citas que recibe un paper en una red de citaciones académicas, o como en los ejemplos anteriores, la cantidad de amigos que tiene una persona en facebook, o la cantidad de vuelos que llegan y/o que salen de un aeropuerto en una red dirigida de transporte aéreo de pasajeros. Usualmente se denomina con $k_i$ el grado del i-esimo nodo de la red. En una red dirigida vamos a hablar de *in-degree* para la cantidad de enlaces que llegan dirigidos hacia un nodo, y de *out-degree* para la cantidad de enlaces que salen desde un nodo hacia otros. 
+
+## Grado promedio de una red y distribución de grados
+
+TODO
+## Peso o ponderación de un enlace:
+
+TODO
+
+
+# Objetos de clase igraph
+La descripción de un objeto de clase `igraph`parte con hasta cuatro letras:
+
+D o U, para un gráfico dirigido o no dirigido
+N para un grafo con nombre (donde los nodos tienen un atributo de nombre)
+W para un grafo ponderado o con pesos (donde los enlaces tienen un atributo de peso)
+B para un grafo bipartito (dos modos) (donde los nodos tienen un atributo de tipo)
+Los dos números que siguen (7 5) se refieren al número de nodos y aristas en el gráfico. La descripción también enumera los atributos de nodo y borde, por ejemplo:
+
+(g/c) - atributo de carácter a nivel de gráfico
+(v/c) - atributo de carácter de nivel de vértice
+(e/n) - atributo numérico de nivel de borde
+
+
+```{r}
+# veamos el grado de cada nodo, y el grado promedio y distribución de grado para las redes g y net
+degree(net)
+
+degree.distribution(net)
+```
+
+# Matriz de adyacencia
+
+La matriz de adyacencia (usualmente representada con $A$) es una matriz booleana (para redes sin peso) de dimensión n x n utilizada para representar un grafo. Esta consiste en una matriz de ceros, donde las columnas y filas representan los nodos del grafo. Por cada arista que une a dos nodos $(i,j)$, se suma 1 al valor que hay actualmente en el elemento correspondiente ($A_{ij}$)  de la matriz.
+
+
+# ejemplo un poco más complejo
+Veamos la siguiente red 
+
+```{r}
+g4 <- graph( c("John", "Jim", "Jim", "Jack", "Jim", "Jack", "John", "John"), 
+             isolates=c("Jesse", "Janis", "Jennifer", "Justin") )  
+# Se pueden especificar los nodos aislados con una lista.
+```
+
+
+```{r}
+plot(g4, edge.arrow.size=.5, vertex.color="gold", vertex.size=15, 
+     vertex.frame.color="gray", vertex.label.color="black", 
+     vertex.label.cex=1.5, vertex.label.dist=2, edge.curved=0.2) 
+
+```
+
+```{r}
+# En general, se pueden llamar colores por el nombre, el código hexadecimal y por los valores rgb
+# e.g. "blue" "dark red" "#557799" or rgb(.25, .5, .3))
+# Podemos ver los nombres de colores default con colors():
+colors() 
+
+# Ya vimos que podíamos acceder a los vértices y enlaces mediante
+E(g4) # Enlaces
+V(g4) # Vértices
+
+```
+
+
+
+```{r}
+# Se puede examinar la matriz de la red directamente también mediante
+g4[] # la matriz de adyacencia completa (de tipo sparse para gastar menos memoria)
+g4[1,] # la fila de John
+
+```
+
+```{r}
+# Podemos llamar y añadir/quitar atributos a la red, los vértices y los enlaces haciendo:
+
+V(g4)$name # Se genera automáticamente cuando se crea la red.
+V(g4)$gender <- c("male", "male", "male", "male", "female", "female", "male") 
+E(g4)$type <- "email" # Atributo de enlace, asignado "email" para todos los enlaces.
+E(g4)$weight <- 10    # Atributo de peso, asignandole peso 10 a todos los enlaces existentes.
+
+```
+
+```{r}
+# Examinemos los atributos
+# de los enlaces
+edge_attr(g4)
+# de los vértices
+vertex_attr(g4)
+# de la red
+graph_attr(g4)
+```
+
+```{r}
+# Otra forma de settear atributos
+# Análogamente se puede usar set_edge_attr() y set_vertex_attr(), así como get.edge.attribute(), etc.
+g4 <- set_graph_attr(g4, "name", "Email Network") 
+g4 <- set_graph_attr(g4, "something", "A thing")
+
+graph_attr_names(g4) 
+graph_attr(g4, "name")
+graph_attr(g4)
+
+g4 <- delete_graph_attr(g4, "something")
+graph_attr(g4)
+
+```
+
+
+```{r}
+plot(g4, edge.arrow.size=.5, vertex.label.color="black", vertex.label.dist=1.5,
+     vertex.color=c( "pink", "skyblue")[1+(V(g4)$gender=="male")] ) 
+
+```
+
+
+```{r}
+# g4 tiene dos aristas que van de Jim a Jack y un bucle de John a él mismo.
+# Podemos simplificar nuestro gráfico para eliminar bucles y múltiples bordes entre los mismos nodos.
+# Usamos 'edge.attr.comb' para indicar cómo se combinarán los atributos de enlace - posibles
+# opciones incluyen "suma", "media", "prod" (producto), min, max, primero/último (selecciona
+# el atributo del primer/último enlace). La opción "ignorar" dice que el atributo debe ser
+# ignorado y descartado.
+
+
+g4s <- simplify( g4, remove.multiple = T, remove.loops = F, 
+                 edge.attr.comb=list(weight="sum", type="ignore") )
+plot(g4s, vertex.label.dist=1.5)
+g4s
+
+
+```
+
+# Leyendo datos de redes
+```{r}
+
+
+ 
+rm(list = ls()) # clear the workspace again
+
+# Download the archive with the data files from http://bitly.com/netscix2016 
+ 
+# Set the working directory to the folder containing the workshop files:
+# (In RStudio, you can also go to Session -> Set working directory)
+setwd("C:/NetSciX Workshop")  
+ 
+
+# ------~~ Edgelist data (DATASET 1) -------- 
+ 
+nodes <- read.csv("./Data files/Dataset1-Media-Example-NODES.csv", header=T, as.is=T)
+links <- read.csv("./Data files/Dataset1-Media-Example-EDGES.csv", header=T, as.is=T)
+
+# Examine the data:
+head(nodes)
+head(links)
+nrow(nodes); length(unique(nodes$id))
+nrow(links); nrow(unique(links[,c("from", "to")]))
+
+# Collapse multiple links of the same type between the same two nodes
+# by summing their weights, using aggregate() by "from", "to", & "type":
+# (we don't use "simplify()" here so as not to collapse different link types)
+links <- aggregate(links[,3], links[,-3], sum)
+links <- links[order(links$from, links$to),]
+colnames(links)[4] <- "weight"
+rownames(links) <- NULL
+
+
+# ------~~ Matrix data (DATASET 2) --------  
+
+nodes2 <- read.csv("./Data files/Dataset2-Media-User-Example-NODES.csv", header=T, as.is=T)
+links2 <- read.csv("./Data files/Dataset2-Media-User-Example-EDGES.csv", header=T, row.names=1)
+
+# Examine the data:
+head(nodes2)
+head(links2)
+
+# links2 is an adjacency matrix for a two-mode network:
+links2 <- as.matrix(links2)
+dim(links2)
+dim(nodes2)
+
+
+# ------~~ Creating igraph objects --------
+
+library(igraph)
+
+# --- DATASET 1 
+
+# Converting the data to an igraph object:
+# The graph.data.frame function, which takes two data frames: 'd' and 'vertices'.
+# 'd' describes the edges of the network - it should start with two columns 
+# containing the source and target node IDs for each network tie.
+# 'vertices' should start with a column of node IDs.
+# Any additional columns in either data frame are interpreted as attributes.
+
+net <- graph_from_data_frame(d=links, vertices=nodes, directed=T) 
+
+# Examine the resulting object:
+class(net)
+net 
+
+# We can look at the nodes, edges, and their attributes:
+E(net)
+V(net)
+E(net)$type
+V(net)$media
+
+plot(net, edge.arrow.size=.4,vertex.label=NA)
+
+# Removing loops from the graph:
+net <- simplify(net, remove.multiple = F, remove.loops = T) 
+
+# If you need them, you can extract an edge list or a matrix from igraph networks.
+as_edgelist(net, names=T)
+as_adjacency_matrix(net, attr="weight")
+
+# Or data frames describing nodes and edges:
+as_data_frame(net, what="edges")
+as_data_frame(net, what="vertices")
+
+
+# ---  DATASET 2 
+
+head(nodes2)
+head(links2)
+
+net2 <- graph_from_incidence_matrix(links2)
+
+# A built-in vertex attribute 'type' shows which mode vertices belong to.
+table(V(net2)$type)
+
+plot(net2,vertex.label=NA)
+
+# To transform a one-mode network matrix into an igraph object,
+# use graph_from_adjacency_matrix()
+
+# We can also easily generate bipartite projections for the two-mode network:
+# (co-memberships are easy to calculate by multiplying the network matrix by
+# its transposed matrix, or using igraph's bipartite.projection function)
+
+net2.bp <- bipartite.projection(net2)
+
+# We can calculate the projections manually as well:
+#   as_incidence_matrix(net2)  %*% t(as_incidence_matrix(net2))
+# t(as_incidence_matrix(net2)) %*%   as_incidence_matrix(net2)
+
+plot(net2.bp$proj1, vertex.label.color="black", vertex.label.dist=1,
+     vertex.label=nodes2$media[!is.na(nodes2$media.type)])
+
+plot(net2.bp$proj2, vertex.label.color="black", vertex.label.dist=1,
+     vertex.label=nodes2$media[ is.na(nodes2$media.type)])
+
+
+# ================ 4. Plotting network data ================
+
+ 
+#  ------~~ Plot parameters in igraph --------
+
+# Plotting with igraph: node options (starting with 'vertex.') and edge options
+# (starting with 'edge.'). A list of options is included in your handout.
+?igraph.plotting
+
+# We can set the node & edge options in two ways - one is to specify
+# them in the plot() function, as we are doing below.
+
+# Plot with curved edges (edge.curved=.1) and reduce arrow size:
+plot(net, edge.arrow.size=.4, edge.curved=.1)
+
+# Set node color to orange and the border color to hex #555555
+# Replace the vertex label with the node names stored in "media"
+plot(net, edge.arrow.size=.2, edge.curved=0,
+     vertex.color="orange", vertex.frame.color="#555555",
+     vertex.label=V(net)$media, vertex.label.color="black",
+     vertex.label.cex=.7) 
+
+# The second way to set attributes is to add them to the igraph object.
+
+# Generate colors based on media type:
+colrs <- c("gray50", "tomato", "gold")
+V(net)$color <- colrs[V(net)$media.type]
+
+# Set node size based on audience size:
+V(net)$size <- V(net)$audience.size*0.7
+
+# The labels are currently node IDs.
+# Setting them to NA will render no labels:
+V(net)$label.color <- "black"
+V(net)$label <- NA
+
+# Set edge width based on weight:
+E(net)$width <- E(net)$weight/6
+
+#change arrow size and edge color:
+E(net)$arrow.size <- .2
+E(net)$edge.color <- "gray80"
+
+# We can even set the network layout:
+graph_attr(net, "layout") <- layout_with_lgl
+plot(net) 
+
+# We can also override the attributes explicitly in the plot:
+plot(net, edge.color="orange", vertex.color="gray50") 
+
+
+# We can also add a legend explaining the meaning of the colors we used:
+plot(net) 
+legend(x=-1.1, y=-1.1, c("Newspaper","Television", "Online News"), pch=21,
+       col="#777777", pt.bg=colrs, pt.cex=2.5, bty="n", ncol=1)
+
+
+# Sometimes, especially with semantic networks, we may be interested in 
+# plotting only the labels of the nodes:
+
+plot(net, vertex.shape="none", vertex.label=V(net)$media, 
+     vertex.label.font=2, vertex.label.color="gray40",
+     vertex.label.cex=.7, edge.color="gray85")
+
+
+# Let's color the edges of the graph based on their source node color.
+# We'll get the starting node for each edge with "ends()".
+edge.start <- ends(net, es=E(net), names=F)[,1]
+edge.col <- V(net)$color[edge.start]
+
+plot(net, edge.color=edge.col, edge.curved=.1)
+
+
+#  ------~~ Network Layouts --------
+
+
+
+```
+
+
+# Centralidad
+
+Las medidas de centralidad se utilizan para identificar los nodos más importantes de una red. Las medidas de centralidad más utilizadas son la centralidad de grado, la centralidad de intermediación y la centralidad de cercanía. La centralidad de grado mide la cantidad de conexiones que tiene un nodo, la centralidad de intermediación mide la cantidad de rutas más cortas en las que se encuentra un nodo y la centralidad de cercanía mide la distancia promedio de un nodo a todos los demás nodos en la red.
+
+```{r}
+
+
+# Calcular índices de red
+# Calcular grado de centralidad (degree centrality) 
+degree_centrality <- degree(g) 
+
+# Calcular centralidad de cercanía 
+closeness_centrality <- closeness(g) 
+
+# Calcular la centralidad de intermediación
+betweenness_centrality <- betweenness(g)
+
+# Analiza el grafo de red
+# Calcular la transitividad del grafo de red
+transitivity <- transitivity(g, type = 'global') 
+# Calcular la longitud de ruta promedio entre nodos
+avg_path_length <- average.path.length(g) 
+# Calcular la densidad de la red
+density <- graph.density(g) 
+
+```
+
+
+# Layouts y algoritmos de visualización de redes. 
+
+Las redes se pueden visualizar utilizando software de visualización de grafos, como Gephi y cytoscape. Los grafos se pueden visualizar como nodos y bordes, o como matrices, que muestran las conexiones entre los nodos. Los grafos también se pueden visualizar mediante diagramas de red, que muestran la estructura de la red como una serie de nodos interconectados.
+
+```{r}
+# Network layouts are algorithms that return coordinates for each
+# node in a network.
+
+# Let's generate a slightly larger 80-node graph.
+
+net.bg <- sample_pa(80, 1.2) 
+V(net.bg)$size <- 8
+V(net.bg)$frame.color <- "white"
+V(net.bg)$color <- "orange"
+V(net.bg)$label <- "" 
+E(net.bg)$arrow.mode <- 0
+plot(net.bg)
+
+# You can set the layout in the plot function:
+plot(net.bg, layout=layout_randomly)
+
+# Or calculate the vertex coordinates in advance:
+l <- layout_in_circle(net.bg)
+plot(net.bg, layout=l)
+
+# l is simply a matrix of x,y coordinates (N x 2) for the N nodes in the graph. 
+# You can generate your own:
+l
+l <- cbind(1:vcount(net.bg), c(1, vcount(net.bg):2))
+plot(net.bg, layout=l)
+
+# This layout is just an example and not very helpful - thankfully
+# igraph has a number of built-in layouts, including:
+
+# Randomly placed vertices
+l <- layout_randomly(net.bg)
+plot(net.bg, layout=l)
+
+# Circle layout
+l <- layout_in_circle(net.bg)
+plot(net.bg, layout=l)
+
+# 3D sphere layout
+l <- layout_on_sphere(net.bg)
+plot(net.bg, layout=l)
+
+# The Fruchterman-Reingold force-directed algorithm 
+# Nice but slow, most often used in graphs smaller than ~1000 vertices. 
+l <- layout_with_fr(net.bg)
+plot(net.bg, layout=l)
+
+# You will also notice that the layout is not deterministic - different runs 
+# will result in slightly different configurations. Saving the layout in l
+# allows us to get the exact same result multiple times.
+par(mfrow=c(2,2), mar=c(1,1,1,1))
+plot(net.bg, layout=layout_with_fr)
+plot(net.bg, layout=layout_with_fr)
+plot(net.bg, layout=l)
+plot(net.bg, layout=l)
+dev.off()
+
+# By default, the coordinates of the plots are rescaled to the [-1,1] interval
+# for both x and y. You can change that with the parameter "rescale=FALSE"
+# and rescale your plot manually by multiplying the coordinates by a scalar.
+# You can use norm_coords to normalize the plot with the boundaries you want.
+
+# Get the layout coordinates:
+l <- layout_with_fr(net.bg)
+# Normalize them so that they are in the -1, 1 interval:
+l <- norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)
+
+par(mfrow=c(2,2), mar=c(0,0,0,0))
+plot(net.bg, rescale=F, layout=l*0.4)
+plot(net.bg, rescale=F, layout=l*0.8)
+plot(net.bg, rescale=F, layout=l*1.2)
+plot(net.bg, rescale=F, layout=l*1.6)
+dev.off()
+
+# Another popular force-directed algorithm that produces nice results for
+# connected graphs is Kamada Kawai. Like Fruchterman Reingold, it attempts to 
+# minimize the energy in a spring system.
+
+l <- layout_with_kk(net.bg)
+plot(net.bg, layout=l)
+
+# The LGL algorithm is for large connected graphs. Here you can specify a root - 
+# the node that will be placed in the middle of the layout.
+plot(net.bg, layout=layout_with_lgl)
+
+# By default, igraph uses a layout called layout_nicely which selects
+# an appropriate layout algorithm based on the properties of the graph. 
+
+# Check out all available layouts in igraph:
+?igraph::layout_
+
+layouts <- grep("^layout_", ls("package:igraph"), value=TRUE)[-1] 
+# Remove layouts that do not apply to our graph.
+layouts <- layouts[!grepl("bipartite|merge|norm|sugiyama|tree", layouts)]
+
+par(mfrow=c(3,3), mar=c(1,1,1,1))
+
+for (layout in layouts) {
+  print(layout)
+  l <- do.call(layout, list(net)) 
+  plot(net, edge.arrow.mode=0, layout=l, main=layout) }
+
+dev.off()
+
+```
+
+
+
+# Redes aleatorias, de mundo pequeño y libres de escala (solo un vistazo)
+
+Las redes aleatorias son redes en las que las conexiones entre nodos se generan aleatoriamente. Las redes aleatorias son útiles para analizar la estructura y la dinámica de las redes y, a menudo, se utilizan para modelar redes del mundo real.
+
+
+```{r}
+# Erdos-Renyi random graph 
+# ('n' is number of nodes, 'm' is the number of edges)
+er <- sample_gnm(n=100, m=40) 
+plot(er, vertex.size=6, vertex.label=NA)  
+
+# Watts-Strogatz small-world graph
+# Creates a lattice with 'dim' dimensions of 'size' nodes each, and rewires edges 
+# randomly with probability 'p'. You can allow 'loops' and 'multiple' edges.
+# The neighborhood in which edges are connected is 'nei'.
+sw <- sample_smallworld(dim=2, size=10, nei=1, p=0.1)
+plot(sw, vertex.size=6, vertex.label=NA, layout=layout_in_circle)
+ 
+# Barabasi-Albert preferential attachment model for scale-free graphs
+# 'n' is number of nodes, 'power' is the power of attachment (1 is linear)
+# 'm' is the number of edges added on each time step 
+ ba <-  sample_pa(n=100, power=1, m=1,  directed=F)
+ plot(ba, vertex.size=6, vertex.label=NA)
+ 
+#igraph can also give you some notable historical graphs. For instance:
+ zach <- graph("Zachary") # the Zachary carate club
+ plot(zach, vertex.size=10, vertex.label=NA)
+ 
+  # Rewiring a graph
+ # 'each_edge()' is a rewiring method that changes the edge endpoints
+ # uniformly randomly with a probability 'prob'.
+ rn.rewired <- rewire(rn, each_edge(prob=0.1))
+ plot(rn.rewired, vertex.size=10, vertex.label=NA)
+ 
+ # Rewire to connect vertices to other vertices at a certain distance. 
+ rn.neigh = connect.neighborhood(rn, 5)
+ plot(rn.neigh, vertex.size=8, vertex.label=NA) 
+ 
+ 
+ # Combine graphs (disjoint union, assuming separate vertex sets): %du%
+ plot(rn, vertex.size=10, vertex.label=NA) 
+ plot(tr, vertex.size=10, vertex.label=NA) 
+ plot(rn %du% tr, vertex.size=10, vertex.label=NA) 
+
+```
+
+
+
+
+
+## igraphdata: exploremos algunas redes más reales
+
+Cargamos el paquete `igraphdata`, donde vienen varios ejemplos de redes reales de distinto tipo.
+
+```{r}
+library(igraphdata)
+
+
+
+```
+
+
+
+# Redes Bipartitas
+
+Las redes bipartitas son redes en las que los nodos se pueden dividir en dos conjuntos distintos, como personas y organizaciones en una red social o universidades y estudiantes en una red educativa. Las redes bipartitas son útiles para analizar las relaciones entre dos tipos diferentes de elementos.
+
+
+
+# Ejemplo extendido: Flavor Network and the Principles of Food Pairing.
+
+El paper "Flavor Network and the Principles of Food Pairing" aplica la ciencia de redes y otras técnicas de análisis de datos para construir una red de sabores a partir de una gran base de datos de recetas. Específicamente, los autores construyen una red dirigida y ponderada en la que los nodos representan ingredientes individuales y los bordes representan el grado en que los ingredientes se usan juntos en las recetas. Luego, los autores analizan la red para identificar los principios subyacentes al maridaje de alimentos.
+
+Los principales métodos utilizados en esta investigación incluyen la minería de datos y el análisis de redes. Los autores extraen una gran base de datos de recetas para obtener los ingredientes utilizados en cada receta y el grado en que se utilizan juntos. Estos datos se utilizan luego para construir la red de sabor. Luego se emplean técnicas de análisis de redes para identificar los patrones de combinaciones de ingredientes y los principios que los sustentan.
+
+Los principales resultados de esta investigación incluyen la identificación de cuatro principios de maridaje de alimentos. Estos principios son emparejamientos complementarios (p. ej., agridulce), compartir ingredientes (p. ej., huevos y leche), ingredientes puente (p. ej., cebollas) y afinidades de sabor (p. ej., ajo y albahaca). Los autores también identificaron una serie de ingredientes específicos que se usan comúnmente para unir diferentes perfiles de sabor.
+
+Los conceptos de ciencia de redes aplicados en esta investigación incluyen el análisis de topología de red y redes ponderadas. Los autores analizan la topología de la red para identificar los patrones de emparejamiento de ingredientes y los principios que los sustentan. También analizan la red ponderada para identificar los ingredientes que comúnmente se usan juntos.
+
+
+
+# Leer datos
+
+Los datos de Flavor Network están disponibles en el sitio web http://www.nature.com/articles/srep00196#data. Este conjunto de datos contiene una lista de ingredientes y sus compuestos de sabor asociados.
+
+# Establecer una red bipartita
+
+Usando el paquete igraph en R, podemos crear una red bipartita a partir del conjunto de datos. Primero, necesitamos crear dos conjuntos de nodos, uno para ingredientes y otro para compuestos de sabor. Luego, podemos crear bordes entre los ingredientes y los compuestos de sabor.
+
+# Visualizar Red de sabores
+
+Podemos visualizar la red de sabor usando el paquete sna en R. Podemos establecer el diseño del grafo en un diseño circular y luego establecer el color y el tamaño del nodo para representar los ingredientes y los compuestos de sabor. Cada nodo representa un ingrediente diferente, donde el tamaño del nodo representa la prevalencia del ingrediente en una variedad de recetas. El grosor de una línea entre dos nodos refleja el número relativo de compuestos de sabor compartidos por los dos ingredientes.
+
+
+
+
+
+
+
+
+## Dinámica de red
+
+Ahora que hemos explorado la estructura de la red, veamos la dinámica. Usaremos la función `simulate.dynamics` para simular la dinámica del sistema. Esta función toma un objeto de grafo, el número de pasos para simular y la probabilidad de agregar un nuevo borde como argumentos.
+```{r}
+# Simulate the dynamics of the network
+simulate.dynamics(net, steps=100, p=0.2)
+```
+
+Podemos ver que la red ha agregado algunas aristas con el tiempo, pero la cantidad de aristas se mantiene relativamente estable.
+
