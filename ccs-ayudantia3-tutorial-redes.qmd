@@ -484,14 +484,10 @@ density <- graph.density(g)
 
 
 # Layouts y algoritmos de visualización de redes. 
-
-Las redes se pueden visualizar utilizando software de visualización de grafos, como Gephi y cytoscape. Los grafos se pueden visualizar como nodos y bordes, o como matrices, que muestran las conexiones entre los nodos. Los grafos también se pueden visualizar mediante diagramas de red, que muestran la estructura de la red como una serie de nodos interconectados.
+Existen muchas formas de visualizar una red. Los grafos se pueden visualizar como nodos y aristas, o como matrices, que muestran las conexiones entre los nodos. Los grafos también se pueden visualizar mediante diagramas de red, que muestran la estructura de la red como una serie de nodos interconectados. Existen muchos layouts de redes, que son algoritmos que al computarse, retornan coordenadas para cada nodo (y cada enlace) en una red.
 
 ```{r}
-# Network layouts are algorithms that return coordinates for each
-# node in a network.
-
-# Let's generate a slightly larger 80-node graph.
+# Generemos un grafo relativamente largo de 80 nodos.
 
 net.bg <- sample_pa(80, 1.2) 
 V(net.bg)$size <- 8
@@ -500,58 +496,82 @@ V(net.bg)$color <- "orange"
 V(net.bg)$label <- "" 
 E(net.bg)$arrow.mode <- 0
 plot(net.bg)
+```
 
-# You can set the layout in the plot function:
+
+```{r}
+# Se puede settear el layout en la función plot:
 plot(net.bg, layout=layout_randomly)
+```
 
-# Or calculate the vertex coordinates in advance:
-l <- layout_in_circle(net.bg)
+
+```{r}
+# O también calcular las coordenadas de los vértices por adelantado:
+l <- layout_in_circle(net.bg) # un nuevo layout
 plot(net.bg, layout=l)
+```
 
-# l is simply a matrix of x,y coordinates (N x 2) for the N nodes in the graph. 
-# You can generate your own:
+
+```{r}
+# l es simplemente una matriz de coordenadas x,y (N x 2) para los N nodos en el grafo
+# Puedes generar una propia:
 l
 l <- cbind(1:vcount(net.bg), c(1, vcount(net.bg):2))
 plot(net.bg, layout=l)
 
-# This layout is just an example and not very helpful - thankfully
-# igraph has a number of built-in layouts, including:
+# Este layout no sirve mucho...
+# En todo caso, igraph trae un buen número de layouts, entre los cuales están
 
-# Randomly placed vertices
+# vértices al azar
 l <- layout_randomly(net.bg)
 plot(net.bg, layout=l)
+```
 
-# Circle layout
+
+```{r}
+# layout círculo
 l <- layout_in_circle(net.bg)
 plot(net.bg, layout=l)
+```
 
-# 3D sphere layout
+
+```{r}
+# layout esfera 3D 
 l <- layout_on_sphere(net.bg)
 plot(net.bg, layout=l)
+```
 
-# The Fruchterman-Reingold force-directed algorithm 
-# Nice but slow, most often used in graphs smaller than ~1000 vertices. 
+
+```{r}
+# Fruchterman-Reingold force-directed algorithm 
+# Bueno, pero lento de computar, usualmente para grafos de no más de 1000 nodos 
 l <- layout_with_fr(net.bg)
 plot(net.bg, layout=l)
+```
 
-# You will also notice that the layout is not deterministic - different runs 
-# will result in slightly different configurations. Saving the layout in l
-# allows us to get the exact same result multiple times.
+
+```{r}
+# Los layouts no son deterministicos: varían ligeramente cada vez que se corren. 
+# Si guardamos las coordenadas l, podemos reproducir la misma figura varias veces.
+
 par(mfrow=c(2,2), mar=c(1,1,1,1))
 plot(net.bg, layout=layout_with_fr)
 plot(net.bg, layout=layout_with_fr)
 plot(net.bg, layout=l)
 plot(net.bg, layout=l)
 dev.off()
+```
 
-# By default, the coordinates of the plots are rescaled to the [-1,1] interval
-# for both x and y. You can change that with the parameter "rescale=FALSE"
-# and rescale your plot manually by multiplying the coordinates by a scalar.
-# You can use norm_coords to normalize the plot with the boundaries you want.
 
-# Get the layout coordinates:
+```{r}
+# Por default, las coordenadas de los gráficos son reescaladas al intervalo [-1,1]
+# para x e y. Se puede cambiar esto con el parámetro "rescale=FALSE".
+# y reescalarlo manualmente multiplicando las coordenadas por un escalar. 
+# Se puede usar norm_coords para normalizar el plot con los bordes que se requieran.
+
+# Extraer las coordenadas del layout:
 l <- layout_with_fr(net.bg)
-# Normalize them so that they are in the -1, 1 interval:
+# Normalizarlas para que queden en el intervalo -1, 1:
 l <- norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)
 
 par(mfrow=c(2,2), mar=c(0,0,0,0))
@@ -560,26 +580,33 @@ plot(net.bg, rescale=F, layout=l*0.8)
 plot(net.bg, rescale=F, layout=l*1.2)
 plot(net.bg, rescale=F, layout=l*1.6)
 dev.off()
+```
 
-# Another popular force-directed algorithm that produces nice results for
-# connected graphs is Kamada Kawai. Like Fruchterman Reingold, it attempts to 
-# minimize the energy in a spring system.
+
+```{r}
+# Otro algoritmo force-directed popular que da buenos resultados para grafos conectados es Kamada Kawai. Como el  Fruchterman Reingold, intenta minimizar la energía en un sistema de resortes.
 
 l <- layout_with_kk(net.bg)
 plot(net.bg, layout=l)
+```
 
-# The LGL algorithm is for large connected graphs. Here you can specify a root - 
-# the node that will be placed in the middle of the layout.
+
+```{r}
+# El algoritmo LGL es para grafos largos conectados. Aquí se puede especificar un root - el nodo que se pondrá en el medio del layout.
+
 plot(net.bg, layout=layout_with_lgl)
+```
 
-# By default, igraph uses a layout called layout_nicely which selects
-# an appropriate layout algorithm based on the properties of the graph. 
 
-# Check out all available layouts in igraph:
+```{r}
+# Por default, igraph usa un layout llamado layout_nicely, que selecciona
+# un layout apropiado basado en las propiedades del grafo.
+
+# Chequea todos los layouts disponibles en igraph:
 ?igraph::layout_
 
 layouts <- grep("^layout_", ls("package:igraph"), value=TRUE)[-1] 
-# Remove layouts that do not apply to our graph.
+# Remueve todos los layouts que no apliquen al grafo:
 layouts <- layouts[!grepl("bipartite|merge|norm|sugiyama|tree", layouts)]
 
 par(mfrow=c(3,3), mar=c(1,1,1,1))
@@ -602,17 +629,23 @@ Las redes aleatorias son redes en las que las conexiones entre nodos se generan 
 
 ```{r}
 # Erdos-Renyi random graph 
-# ('n' is number of nodes, 'm' is the number of edges)
+# ('n' es el número de nodos, 'm' es el número de enlaces)
 er <- sample_gnm(n=100, m=40) 
-plot(er, vertex.size=6, vertex.label=NA)  
+plot(er, vertex.size=6, vertex.label=NA)
+```
 
+
+```{r}
 # Watts-Strogatz small-world graph
 # Creates a lattice with 'dim' dimensions of 'size' nodes each, and rewires edges 
 # randomly with probability 'p'. You can allow 'loops' and 'multiple' edges.
 # The neighborhood in which edges are connected is 'nei'.
 sw <- sample_smallworld(dim=2, size=10, nei=1, p=0.1)
 plot(sw, vertex.size=6, vertex.label=NA, layout=layout_in_circle)
- 
+```
+
+
+```{r}
 # Barabasi-Albert preferential attachment model for scale-free graphs
 # 'n' is number of nodes, 'power' is the power of attachment (1 is linear)
 # 'm' is the number of edges added on each time step 
