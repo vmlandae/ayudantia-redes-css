@@ -66,7 +66,6 @@ El paquete `igraph` tiene un módulo para graficar que está escrito sobre el pa
 
 ```{r}
 plot(net)
-
 ```
 
 ```{r}
@@ -92,6 +91,7 @@ Una de las más básicas es la diferenciación entre redes dirigidas o redes no 
 V(net)
 
 ```
+
 ```{r}
 # por tanto, una forma de calcular el número de nodos N es haciendo
 length(V(net))
@@ -121,15 +121,44 @@ Las redes también pueden tener atributos asociados a los nodos y a los enlaces.
 
 ## Grado de un nodo
 
-Una propiedad clave de cada nodo es su grado, que representa el número de enlaces que tiene con otros nodos. El grado puede representar la cantidad de contactos de teléfonos celulares que tiene una persona en un grafo de llamadas (es decir, la cantidad de personas diferentes con las que ha hablado la persona), la cantidad de citas que recibe un paper en una red de citaciones académicas, o como en los ejemplos anteriores, la cantidad de amigos que tiene una persona en facebook, o la cantidad de vuelos que llegan y/o que salen de un aeropuerto en una red dirigida de transporte aéreo de pasajeros. Usualmente se denomina con $k_i$ el grado del i-esimo nodo de la red. En una red dirigida vamos a hablar de *in-degree* para la cantidad de enlaces que llegan dirigidos hacia un nodo, y de *out-degree* para la cantidad de enlaces que salen desde un nodo hacia otros. 
+Una propiedad clave de cada nodo es su grado, que representa el número de enlaces que tiene con otros nodos. El grado puede representar la cantidad de contactos de teléfonos celulares que tiene una persona en un grafo de llamadas (es decir, la cantidad de personas diferentes con las que ha hablado la persona), la cantidad de citas que recibe un paper en una red de citaciones académicas, o como en los ejemplos anteriores, la cantidad de amigos que tiene una persona en facebook, o la cantidad de vuelos que llegan y/o que salen de un aeropuerto en una red dirigida de transporte aéreo de pasajeros. Usualmente se denomina con $k_i$ el grado del i-esimo nodo de la red. 
 
-## Grado promedio de una red y distribución de grados
+En una red no dirigida, el número total de enlaces $L$, se puede expresar como la suma de los grados de los nodos:
 
-TODO
+$$L = \frac{1}{2} \sum_{i=1}^N k_i $$ 
+Donde el factor $\frac{1}{2}$ está corrigiendo el hecho que en la sumatoria cada enlace se esté contando dos veces.
+
+## Grado promedio de una red
+Para una red no dirigida, el grado promedio está dado por:
+
+$$ \langle k \rangle = \frac{1}{N} \sum_{i=1}^N k_i = \frac{2L}{N}$$
+
+En redes dirigidas, como distinguimos entre *in-degree* de un nodo, donde ${k_i}^{in}$ representa el número de links que apuntan a un nodo $i$, y *out-degree* ${k_i}^{out}$, representando el número de enlaces que apuntan desde el nodo $i$ hacia otros nodos. Finalmente, el grado total de un nodo $k_i$ en una red dirigida está dado por
+
+$$ k_i = {k_i}^{in}+{k_i}^{out}$$
+Luego, el número total de enlaces de una red dirigida es:
+$$L = \sum_{i=1}^N {k_i}^{in} = \sum_{i=1}^N {k_i}^{out}$$
+No hay corrección por el factor de $\frac{1}{2}$ ya que cada suma cuenta separadamente una vez cada enlace al contar "solo una punta" del enlace. El grado promedio de una red dirigida está dado por:
+$$ \langle k^{in} \rangle = \frac{1}{N} \sum_{i=1}^N {k_i}^{in} = \langle k^{out} \rangle = \frac{1}{N} \sum_{i=1}^N {k_i}^{out} =  \frac{L}{N}$$
+
+## Distribución de grados
+
+La distribución de grados, $p_k$, provee la probabilidad que un nodo seleccionado al azar de la red tenga grado $k$. Dado que $p_k$ es una probabilidad, debe ser normalizada, i.e. 
+
+$$ \sum_{i=1}^{\infty} {p_k} =  1$$
+
+La distribución de grados ha asumido un papel central en la teoría de redes tras el descubrimiento de las redes libres de escala. Una razón es que el cálculo de la mayoría de las propiedades de la red requiere que sepamos $p_k$. Por ejemplo, el grado promedio de una red se puede escribir como:
+
+$$ \langle k \rangle = \sum_{k=0}^\infty {k p_k} $$
+ Otra razón para ello es que la forma funcional precisa de $p_k$ determina muchos fenómenos de redes, desde la robustez de esta hasta la propagación de virus.
+ 
 ## Peso o ponderación de un enlace:
 
-TODO
+En muchas aplicaciones, necesitamos modelar redes ponderadas, donde cada link $(i,j)$ tiene un peso único $w_{ij}$. En una red de llamadas de celulares, por ejemplo, el peso puede representar el número total de minutos que dos sujetos hablaron por teléfono, o en una grilla de potencia, el peso es la cantidad de corriente que fluye a través de una línea de transmisión.
+Para redes con pesos, los elementos de la matriz de adyacencia tienen el peso del enlace, de esta forma:
 
+$$ A_{ij} = w_{ij}$$
+En general, la mayoría de las redes de interés tiene pesos, pero no siempre podemos medirlos adecuadamente, y muchas de las métricas ya conocidas en redes sin pesos se vuelven más costosas computacionalmente o a veces incluso dejan de tener tanto sentido al agregar los pesos a la ecuación. Esto hace que muchas veces terminamos filtrando y aproximando estas redes con un grafo no ponderado. 
 
 # Objetos de clase igraph
 La descripción de un objeto de clase `igraph`parte con hasta cuatro letras:
@@ -145,6 +174,7 @@ Los dos números que siguen (7 5) se refieren al número de nodos y aristas en e
 (e/n) - atributo numérico de nivel de borde
 
 
+
 ```{r}
 # veamos el grado de cada nodo, y el grado promedio y distribución de grado para las redes g y net
 degree(net)
@@ -153,8 +183,26 @@ degree.distribution(net)
 ```
 
 # Matriz de adyacencia
+Es matematicamente posible y muchas veces conveniente en términos analíticos y computacionales poder representar una red a través de una Matriz de Adyacencia.  La matriz de adyacencia de una red dirigida de $N$ nodos tiene $N$ filas y $N$ columnas, siendo sus elementos:
 
-La matriz de adyacencia (usualmente representada con $A$) es una matriz booleana (para redes sin peso) de dimensión n x n utilizada para representar un grafo. Esta consiste en una matriz de ceros, donde las columnas y filas representan los nodos del grafo. Por cada arista que une a dos nodos $(i,j)$, se suma 1 al valor que hay actualmente en el elemento correspondiente ($A_{ij}$)  de la matriz.
+$A_{ij} = 1$ si hay un enlace que apunta desde el nodo $j$ al nodo $i$
+
+$A_{ij} = 0$ si no es así.
+
+La matriz de adyacencia de una red no dirigida tiene dos entradas para cada enlace, e.g. el enlace (1, 2) se representa como $A_{12} = 1$ y $A_{21} = 1$. Por lo tanto, la matriz de adyacencia de una red no dirigida es simétrica, $A_{ij} = A_{ji}$
+
+El grado $k_i$ del nodo $i$ se puede obtener directamente de los elementos de la matriz de adyacencia. Para redes no dirigidas, el grado de un nodo es una suma sobre las filas o las columnas de la matriz, es decir
+
+$$ k_i = \sum_{j=1}^N {A_{ji}} =  \sum_{j=1}^N {A_{ij}} $$
+Para redes dirigidas, las sumas sobre las filas y columnas de la matriz de adyacencia proporcionan los grados entrantes y salientes, respectivamente.
+
+$$ k_i^{in} = \sum_{j=1}^N {A_{ji}} \space\space\space\space \space\space\space\space\space  k_i^{out} = \sum_{j=1}^N {A_{ij}} $$
+
+Dado que en una red no dirigida el número de enlaces salientes es igual al número de enlaces entrantes, tenemos
+$$2L =   \sum_{i=1}^N {k_{i}}^{in} =  \sum_{i=1}^N {k_{i}}^{out}  =\sum_{ij}^N {A_{ij}} $$
+
+El número de elementos distintos de cero de la matriz de adyacencia es 2L, o el doble del número de enlaces. De hecho, un enlace no dirigido que conecta los nodos $i$ y $j$ aparece en dos entradas: 
+$A_{ij} = 1$, un enlace que apunta del nodo $j$ al nodo $i$, y $A_{ji} = 1$, un enlace que apunta del $i$ al $j$ 
 
 
 # ejemplo un poco más complejo
