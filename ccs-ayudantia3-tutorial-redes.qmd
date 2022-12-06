@@ -644,20 +644,27 @@ dev.off()
 
 # Redes aleatorias, de mundo pequeño y libres de escala (solo un vistazo)
 
-Las redes aleatorias son redes en las que las conexiones entre nodos se generan aleatoriamente. Las redes aleatorias son útiles para analizar la estructura y la dinámica de las redes y, a menudo, se utilizan para modelar redes del mundo real.
+Las redes aleatorias son redes en las que las conexiones entre nodos se generan aleatoriamente con la misma probabilidad. Es decir, un grafo aleatorio consiste en $N$ nodos donde cada par de nodos está conectado con probabilidad $p$.
 
 
 ```{r}
 # Erdos-Renyi random graph 
-# ('n' es el número de nodos, 'm' es el número de enlaces)
+# ('n' es el número de nodos, 'm' es el número de enlaces, los cuales están fijos y son mezclados aleatoriamente)
 er <- sample_gnm(n=100, m=40) 
 plot(er, vertex.size=6, vertex.label=NA)
 ```
 
 
 ```{r}
+# Como dijimos más arriba, también se puede definir en función de N y la probabilidad de enlazarse p.
+er <- sample_gnp(n = 100,p = 0.4)
+plot(er, vertex.size=6, vertex.label=NA)
+```
+
+
+```{r}
 # Watts-Strogatz small-world graph
-# Creamos un lattice con 'dim' dimensiones de 'size' nodes cada uno, y recableamos los enlaces aleatoriamente con probabilidad  'p'. Podemos permitir  'loops' y  enlaces 'multiples'.
+# Creamos un lattice (o rejilla) con 'dim' dimensiones de 'size' nodes cada uno, y recableamos los enlaces aleatoriamente con probabilidad  'p'. Podemos permitir  'loops' y  enlaces 'multiples'.
 # El neighborhood en el cual los enlaces estaban conectados es 'nei'.
 sw <- sample_smallworld(dim=2, size=10, nei=1, p=0.1)
 plot(sw, vertex.size=6, vertex.label=NA, layout=layout_in_circle)
