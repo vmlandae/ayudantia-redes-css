@@ -37,3 +37,5 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+ccs-ayudantia3-tutorial-redes_files/.DS_Store
+.DS_Store

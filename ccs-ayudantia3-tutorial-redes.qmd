@@ -674,18 +674,44 @@ plot(sw, vertex.size=6, vertex.label=NA, layout=layout_in_circle)
 
 
 ```{r}
-# También podemos llamar algunos grafos clásicos: El club de Karate de Zachary
+# También podemos llamar algunas redes clásicas: El club de Karate de Zachary
  zach <- graph("Zachary") # Zachary Karate club
  plot(zach, vertex.size=10, vertex.label=NA)
 ```
 
+```{r}
+# Y también otros grafos con alguna característica notable. Por ejemplo, un tree
+
+tr <- make_tree(40, children = 3, mode = "undirected")
+
+plot(tr, vertex.size=10, vertex.label=NA) 
+
+```
+
+```{r}
+# O un grafo full, donde todos estén enlazados con todos
+
+fg <- make_full_graph(40)
+
+plot(fg, vertex.size=10, vertex.label=NA)
+
+```
+
+
 
 ```{r}
 # "Recableando" un grafo
- # 'each_edge()' es un método de rewiring que cambia el endpoint de los enlaces
+# creamos primero un grafo de tipo anillo:
+rn <- make_ring(40)
+plot(rn, vertex.size=10, vertex.label=NA)
+```
+
+
+```{r}
+# 'each_edge()' es un método de rewiring que cambia el endpoint de los enlaces
  # de manera uniformemente aleatoria con una probabilidad 'prob'.
- rn.rewired <- rewire(rn, each_edge(prob=0.1))
- plot(rn.rewired, vertex.size=10, vertex.label=NA)
+rn.rewired <- rewire(rn, each_edge(prob=0.1))
+plot(rn.rewired, vertex.size=10, vertex.label=NA)
 ```
 
 
